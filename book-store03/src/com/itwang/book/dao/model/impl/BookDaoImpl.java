@@ -71,4 +71,14 @@ public class BookDaoImpl extends BaseDaoImpl<Book> implements BookDao {
         String sql = "delete from t_book where book_id = ?";
         return update(sql, id);
     }
+
+    /**
+     * 根据id 查询对应的书籍
+     * @param bookId
+     * @return
+     */
+    @Override
+    public Book getBookById(String bookId) {
+        return selectBookInfo(bookId);
+    }
 }

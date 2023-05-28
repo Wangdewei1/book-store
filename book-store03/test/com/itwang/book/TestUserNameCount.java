@@ -9,7 +9,7 @@ public class TestUserNameCount {
     @Test
     public void TestUserNameCountByUsername(){
         BaseDao<User> baseDao = new BaseDaoImpl<>();
-        String username = "zhangsan1234";
+        String username = "zhangsan123412341234";
         String sql = "select count(*) from t_user where user_name = ?";
         Object o = baseDao.selectScalar(sql, username);
         Integer count = Integer.valueOf(Integer.parseInt(o.toString()));

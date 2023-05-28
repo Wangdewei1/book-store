@@ -40,7 +40,7 @@
           <div class="form-item">
             <div>
               <label>用户名称:</label>
-              <input type="text" @blur="checkDataUsername" name="username" placeholder="请输入用户名" v-model.trim="username" @change="checkUsername"/>
+              <input type="text" name="username" placeholder="请输入用户名" v-model.trim="username" @change="checkUsername"/>
             </div>
             <span class="errMess" v-bind:style="usernameCss">{{errMess}}</span>
           </div>
@@ -93,6 +93,7 @@
               "usernameCss":{
                   "visibility":"hidden"
               },
+              "usernameFlag":false,
               "errMess":"用户名应为6~16位数组和字母组成",
               "password":"",
               "passwordCss":{
@@ -122,13 +123,41 @@
                   }
 
                   let req = /^[A-Za-z0-9]{6,16}$/
-                  if (req.test(this.username)){
-                      this.errMess = "√"
-                      return true
-                  } else {
-                      this.errMess = "用户名应为6~16位数组和字母组成"
-                      return false
+                  // if (req.test(this.username)){
+                  //     this.errMess = "√"
+                  //     return true
+                  // } else {
+                  //     this.errMess = "用户名应为6~16位数组和字母组成"
+                  //     return false
+                  // }
+                  if (!req.test(this.username)){
+                    this.errMess = "用户名应为6~16位数组和字母组成"
+                    return;
                   }
+
+                  let obj = this;
+
+                //格式验证通过，发送ajax请求验证用户名是否唯一
+                axios({
+                  "url":"UserServlet",
+                  "method":"post",
+                  "params":{
+                    "method":"getUsername",
+                    "username":this.username
+                  }
+                }).then(function (response) {
+                  // console.log(response.data.result)
+                  // console.log(response.data)
+                  if (response.data.result == "SUCCESS"){
+                    obj.errMess = "用户名可用"
+                    obj.usernameFlag = true
+                  }
+                  if(response.data.result == "FAILED"){
+                    obj.errMess = "用户名已存在"
+                    obj.usernameFlag = false
+                  }
+                })
+                return this.usernameFlag;
               },
               "checkPassword":function (){
 
@@ -191,17 +220,6 @@
               },
               "checkCode":function (){
                       this.codePictureUrl = "KaptchaServlet?random=" + Math.random()
-              },
-              "checkDataUsername":function () {
-                  axios({
-                      "url":"UserServlet?method=getUsername",
-                      "method":"post",
-                      "data":{
-                          "username":this.username
-                      }
-                  }).then(function (response) {
-                      this.errMess = "[[${session.msg}]]"
-                  })
               }
           }
       })

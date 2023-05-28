@@ -61,4 +61,14 @@ public class BookServiceImpl implements BookService {
     public Integer deleteById(String id) {
         return bookDao.delete(id);
     }
+
+    /**
+     * 根据bookId 查询 book实体
+     * @param bookId
+     * @return
+     */
+    @Override
+    public Book getBookById(String bookId) {
+        return bookDao.getBookById(bookId);
+    }
 }

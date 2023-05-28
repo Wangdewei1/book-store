@@ -16,4 +16,7 @@ public interface BookDao {
     Integer update(Book book);
 
     Integer delete(String id);
+
+    Book getBookById(String bookId);
+
 }

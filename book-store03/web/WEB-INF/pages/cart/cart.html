@@ -1,33 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="../../static/css/minireset.css" />
-    <link rel="stylesheet" href="../../static/css/common.css" />
-    <link rel="stylesheet" href="../../static/css/cart.css" />
+    <title>购物车页面</title>
+    <base th:href="@{/}"/>
+    <link rel="stylesheet" href="static/css/minireset.css" />
+    <link rel="stylesheet" href="static/css/common.css" />
+    <link rel="stylesheet" href="static/css/cart.css" />
   </head>
+  <script type="text/javascript" src="static/script/axios.min.js"></script>
+  <script type="text/javascript" src="static/script/vue.js"></script>
+  <script type="text/javascript" src="static/script/jquery.min.js"></script>
+  <script type="text/javascript" src="static/script/layer/layer.js"></script>
   <body>
     <div class="header">
       <div class="w">
         <div class="header-left">
-          <a href="../../index.html">
-            <img src="../../static/img/logo.gif" alt=""
+          <a href="index.html">
+            <img src="static/img/logo.gif" alt=""
           /></a>
           <h1>我的购物车</h1>
         </div>
-        <div class="header-right">
-          <h3>欢迎<span>张总</span>光临尚硅谷书城</h3>
-          <div class="order"><a href="../order/order.html">我的订单</a></div>
-          <div class="destory"><a href="../../index.html">注销</a></div>
+
+<!--        没登陆的购物车-->
+        <div class="header-right" th:if="${session.userLogin == null}">
+<!--          <h3>欢迎<span></span>光临尚硅谷书城</h3>-->
+          <h3><a href="UserServlet?method=toLoginPage">请登入</a></h3>
+          <!--          <h3>欢迎<span th:if="${session.userLogin.userName != null}" th:text="${session.userLogin.userName}">张总</span>光临尚硅谷书城</h3>-->
+          <div class="order"><a href="order/order.html">我的订单</a></div>
+          <div class="destory"><a href="index.html">注销</a></div>
           <div class="gohome">
-            <a href="../../index.html">返回</a>
+            <a href="index.html">返回</a>
+          </div>
+        </div>
+
+<!--        登录后的购物车-->
+        <div class="header-right" th:if="${session.userLogin != null}">
+          <h3>欢迎<span th:text="${session.userLogin.userName}">张总</span>光临尚硅谷书城</h3>
+<!--          <h3>欢迎<span th:if="${session.userLogin.userName != null}" th:text="${session.userLogin.userName}">张总</span>光临尚硅谷书城</h3>-->
+          <div class="order"><a href="order/order.html">我的订单</a></div>
+          <div class="destory"><a href="index.html">注销</a></div>
+          <div class="gohome">
+            <a href="index.html">返回</a>
           </div>
         </div>
       </div>
     </div>
-    <div class="list">
+    <div class="list" id="vueApp">
       <div class="w">
         <table>
           <thead>
@@ -41,24 +61,31 @@
               <th>操作</th>
             </tr>
           </thead>
-          <tbody>
+<!--          购物车没有数据情况-->
+          <tbody v-if="cart == null || cart.totalCount == 0">
             <tr>
-              <td>
-                <img src="../../static/uploads/huozhe.jpg" alt="" />
-              </td>
-              <td>活着</td>
-              <td>
-                <span class="count">-</span>
-                <input class="count-num" type="text" value="1" />
-                <span class="count">+</span>
-              </td>
-              <td>36.8</td>
-              <td>36.8</td>
-              <td><a href="">删除</a></td>
+              <td colspan="6">购物车没有数据，快去购物吧！</td>
             </tr>
-            <tr>
+          </tbody>
+<!--          购物车有数据情况-->
+          <tbody v-if="cart != null || cart.totalCount > 0">
+            <tr v-for="cartItem in cart.cartItemList">
               <td>
-                <img src="../../static/uploads/kanjian.jpg" alt="" />
+                <img v-bind:src="cartItem.book.imgPath" alt="" />
+              </td>
+              <td>{{cartItem.book.bookName}}</td>
+              <td>
+                <span class="count" @click="decrCount" v-bind:id="cartItem.book.bookId">-</span>
+                <input class="count-num" type="text" v-bind:value="cartItem.count" @change="editCount" v-bind:id="cartItem.book.bookId"/>
+                <span class="count" @click="incrCount" v-bind:id="cartItem.book.bookId">+</span>
+              </td>
+              <td>{{cartItem.book.price}}</td>
+              <td>{{cartItem.amount}}</td>
+              <td><a href="" @click.prevent="removeCartItem" v-bind:id="cartItem.book.bookId">删除</a></td>
+            </tr>
+<!--            <tr>
+              <td>
+                <img src="static/uploads/kanjian.jpg" alt="" />
               </td>
               <td>看见</td>
               <td>
@@ -72,7 +99,7 @@
             </tr>
             <tr>
               <td>
-                <img src="../../static/uploads/kanjian.jpg" alt="" />
+                <img src="static/uploads/kanjian.jpg" alt="" />
               </td>
               <td>
                 假如书名太长了,只展示一部分书名.自动展示省略号
@@ -88,17 +115,17 @@
             </tr>
             <tr>
               <td>
-                <img src="../../static/uploads/kanjian.jpg" alt="" />
+                <img src="static/uploads/kanjian.jpg" alt="" />
               </td>
               <td>
                 假如书名太长了,只展示一部分书名.自动展示省略号
               </td>
               <td>
-                <!-- <div> -->
+                &lt;!&ndash; <div> &ndash;&gt;
                 <span class="count">-</span>
                 <input class="count-num" type="text" value="100" />
                 <span class="count">+</span>
-                <!-- </div> -->
+                &lt;!&ndash; </div> &ndash;&gt;
               </td>
               <td>40.1</td>
               <td>40.1</td>
@@ -106,7 +133,7 @@
             </tr>
             <tr>
               <td>
-                <img src="../../static/uploads/kanjian.jpg" alt="" />
+                <img src="static/uploads/kanjian.jpg" alt="" />
               </td>
               <td>
                 假如书名太长了,只展示一部分书名.自动展示省略号
@@ -119,18 +146,18 @@
               <td>40.1</td>
               <td>40.1</td>
               <td><a href="">删除</a></td>
-            </tr>
+            </tr>-->
           </tbody>
         </table>
         <div class="footer">
           <div class="footer-left">
-            <a href="#" class="clear-cart">清空购物车</a>
-            <a href="#">继续购物</a>
+            <a href="#" class="clear-cart" @click.prevent="clearCart">清空购物车</a>
+            <a href="index.html">继续购物</a>
           </div>
           <div class="footer-right">
-            <div>共<span>3</span>件商品</div>
-            <div class="total-price">总金额<span>99.9</span>元</div>
-            <a class="pay" href="checkout.html">去结账</a>
+            <div>共<span>{{cart.totalCount}}</span>件商品</div>
+            <div class="total-price">总金额<span>{{cart.totalAmount}}</span>元</div>
+            <a class="pay" href="CartServlet?method=toCheckOutPage">去结账</a>
           </div>
         </div>
       </div>
@@ -141,19 +168,19 @@
           <ul>
             <li>
               <a href="">
-                <img src="../../static/img/bottom1.png" alt="" />
+                <img src="static/img/bottom1.png" alt="" />
                 <span>大咖级讲师亲自授课</span>
               </a>
             </li>
             <li>
               <a href="">
-                <img src="../../static/img/bottom.png" alt="" />
+                <img src="static/img/bottom.png" alt="" />
                 <span>课程为学员成长持续赋能</span>
               </a>
             </li>
             <li>
               <a href="">
-                <img src="../../static/img/bottom2.png" alt="" />
+                <img src="static/img/bottom2.png" alt="" />
                 <span>学员真是情况大公开</span>
               </a>
             </li>
@@ -186,8 +213,108 @@
         </div>
       </div>
       <div class="down">
-        尚硅谷书城.Copyright ©2015
+        尚硅谷书城.Copyright ©2023
       </div>
     </div>
   </body>
+<script type="text/javascript">
+  new Vue({
+    "el":"#vueApp",
+    "data":{
+      "cart":{
+          "totalCount":0,
+          "currentUpdateBookId":{},
+          "currentUpdateCount":{}
+      }
+    },
+    "methods":{
+      //获取购物车中显示的数据
+      "getAllCartData":function () {
+        axios({
+          "method":"post",
+          "url":"CartServlet?method=getAllCartItemList"
+        }).then(response =>{
+          if (response.data.result == "SUCCESS"){
+            this.cart = response.data.data
+          } else {
+            layer.msg(response.data.message)
+          }
+        })
+      },
+      //更改购物车中，每一条商品的数量
+      "updateCartItemCount":function () {
+        if (this.currentUpdateCount == 0) {
+          let confirmResult = confirm("您确定要删除吗？");
+          if (!confirmResult) {
+            return
+          }
+        }
+          if (this.currentUpdateCount < 0){
+            layer.msg("购物项不能小于0")
+            return;
+          }
+
+          axios({
+            "method":"post",
+            "url":"CartServlet?method=updateCartItemCount",
+            "params":{
+              "bookId":this.currentUpdateBookId,
+              "count":this.currentUpdateCount
+            }
+          }).then(response =>{
+            if (response.data.result == "SUCCESS"){
+              layer.msg("修改数量成功")
+              this.getAllCartData();
+            } else {
+              layer.msg(response.data.message)
+            }
+          })
+      },
+      //编辑购物车中没个条目的商品数量
+      "editCount":function () {
+        this.currentUpdateBookId = event.target.id
+        this.currentUpdateCount = event.target.value
+        this.updateCartItemCount()
+      },
+      "clearCart":function () {
+        axios({
+          "method":"post",
+          "url":"CartServlet?method=clearCart"
+        }).then(response =>{
+          if (response.data.result == "SUCCESS"){
+            layer.msg("清理购物车成功")
+            this.getAllCartData()
+          } else {
+            layer.msg(response.data.message)
+          }
+        })
+      },
+      "decrCount":function () {
+        this.currentUpdateBookId = event.target.id
+        console.log("测试next=" + event.target.next)
+        let countValue = event.target.nextElementSibling.value;
+        this.currentUpdateCount = countValue * 1 - 1
+
+        this.updateCartItemCount()
+      },
+      "incrCount":function () {
+        this.currentUpdateBookId = event.target.id
+        console.log("测试=" + event.target.previousElementSibling);
+        this.currentUpdateCount = event.target.previousElementSibling.value * 1 + 1
+        this.updateCartItemCount()
+      },
+      //如果购物车中的，每一个商品数量为0时，删除这个商品的条目
+      "removeCartItem":function () {
+        this.currentUpdateBookId = event.target.id
+        this.currentUpdateCount = 0
+        this.updateCartItemCount()
+      }
+    },
+    "created"() {
+      //在vue对象初始化完成时发送Ajax请求加载数据
+      //页面初始化完成时调用专门的函数，通过 Ajax 从服务器加载数据
+      this.getAllCartData()
+    }
+  })
+</script>
 </html>

@@ -16,4 +16,6 @@ public interface BookService {
     Integer update(Book book);
 
     Integer deleteById(String id);
+
+    Book getBookById(String bookId);
 }

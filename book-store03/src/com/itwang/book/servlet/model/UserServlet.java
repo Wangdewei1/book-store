@@ -1,10 +1,12 @@
 package com.itwang.book.servlet.model;
 
+import com.google.gson.Gson;
 import com.itwang.book.entity.User;
 import com.itwang.book.service.api.UserService;
 import com.itwang.book.service.impl.UserServiceImpl;
 import com.itwang.book.servlet.base.MethodServlet;
 import com.itwang.book.utils.MD5Utils;
+import com.itwang.book.utils.ResultEntity;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -103,7 +105,7 @@ public class UserServlet extends MethodServlet {
     }
 
     /**
-     * 失焦查询数据库是否有重复的用户名
+     * 值改变查询数据库是否有重复的用户名
      */
     protected void getUsername(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 //        String id = req.getParameter("id");
@@ -114,12 +116,23 @@ public class UserServlet extends MethodServlet {
 
         Integer count = userService.isUsername(username);
 
-        if (count > 0){
-            req.getSession().setAttribute("msg", "用户名不可用");
-            resp.sendRedirect(req.getContextPath() + "/UserServlet?method=toRegisterPage");
-        }
-        if (count == 0){
-            req.getSession().setAttribute("msg", "用户名可用");
-        }
+//        if (count > 0){
+//            req.getSession().setAttribute("msg", "用户名不可用");
+//            resp.sendRedirect(req.getContextPath() + "/UserServlet?method=toRegisterPage");
+//        }
+//        if (count == 0){
+//            req.getSession().setAttribute("msg", "用户名可用");
+//        }
+
+        ResultEntity<Void> resultEntity = (count == 0) ? ResultEntity.ok() : ResultEntity.failed("用户名不可用");
+
+        Gson gson = new Gson();
+
+        String toJson = gson.toJson(resultEntity);
+
+        resp.setContentType("application/json;charset=UTF-8");
+
+        resp.getWriter().write(toJson);
+
     }
 }

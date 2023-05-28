@@ -79,4 +79,14 @@
         <servlet-name>KaptchaServlet</servlet-name>
         <url-pattern>/KaptchaServlet</url-pattern>
     </servlet-mapping>
+<!--    配置 购物车servlet映射-->
+    <servlet>
+        <servlet-name>CartServlet</servlet-name>
+        <servlet-class>com.itwang.book.servlet.model.CartServlet</servlet-class>
+    </servlet>
+<!--    -->
+    <servlet-mapping>
+        <servlet-name>CartServlet</servlet-name>
+        <url-pattern>/CartServlet</url-pattern>
+    </servlet-mapping>
 </web-app>
