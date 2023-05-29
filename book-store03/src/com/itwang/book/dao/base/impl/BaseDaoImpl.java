@@ -7,7 +7,10 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import java.math.BigInteger;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -63,5 +66,52 @@ public class BaseDaoImpl<T> implements BaseDao<T> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void batchAllData(String sql, Object[][] params) {
+        try {
+            Connection connection = JDBCUtils.getConnection();
+            queryRunner.batch(connection, sql, params);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Integer generateGetPrimaryKey(String sql, Object... args) {
+        Connection connection = JDBCUtils.getConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            preparedStatement = connection.prepareStatement(sql,PreparedStatement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < args.length; i++) {
+                preparedStatement.setObject(i+1, args[i]);
+            }
+            preparedStatement.executeUpdate();
+
+            //获取主键
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+
+            if (generatedKeys.next()){
+                BigInteger bigInteger = (BigInteger) generatedKeys.getObject(1);
+                return bigInteger.intValue();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (resultSet != null){
+                    resultSet.close();
+                }
+                if (preparedStatement != null){
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
     }
 }

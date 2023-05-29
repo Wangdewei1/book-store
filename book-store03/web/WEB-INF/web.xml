@@ -14,6 +14,16 @@
         <param-value>.html</param-value>
     </context-param>
 
+<!--    配置登入的过滤器-->
+    <filter>
+        <filter-name>loginUserFilter</filter-name>
+        <filter-class>com.itwang.book.filter.model.LoginUserFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>loginUserFilter</filter-name>
+        <url-pattern>/auth/*</url-pattern>
+    </filter-mapping>
+
 <!--    首页 通过servlet thymeleaf渲染-->
     <servlet>
         <servlet-name>IndexServlet</servlet-name>

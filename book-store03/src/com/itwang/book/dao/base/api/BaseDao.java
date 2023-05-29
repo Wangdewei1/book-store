@@ -22,4 +22,15 @@ public interface BaseDao<T> {
      * 增删改数据
      */
     Integer update(String sql,Object ...args);
+
+    /**
+     * 通用的批量操作数据
+     */
+    void batchAllData(String sql,Object [][] params);
+
+
+    /**
+     * 返回自增主键 的通用方法
+     */
+    Integer generateGetPrimaryKey(String sql ,Object ...args);
 }
