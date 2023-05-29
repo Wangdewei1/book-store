@@ -1,6 +1,7 @@
 package com.itwang.book.dao.model.api;
 
 import com.itwang.book.entity.Book;
+import com.itwang.book.entity.CartItem;
 
 import java.util.List;
 
@@ -19,4 +20,5 @@ public interface BookDao {
 
     Book getBookById(String bookId);
 
+    void batchUpdateBook(List<CartItem> cartItemList);
 }

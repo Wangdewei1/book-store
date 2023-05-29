@@ -61,7 +61,7 @@
                 <input type="submit" value="登录" id="sub_btn" @click.prevent="submitData" />
               </form>
               <div class="tit">
-                <a href="regist.html">立即注册</a>
+                <a th:href="@{/UserServlet(method=toRegisterPage)}" href="">立即注册</a>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@
           "data":{
               "username":"[[${param.username}]]",
               "password":"[[${param.password}]]",
-              "errorMsg":"[[(${#strings.isEmpty(msg)} ? '用户名或密码错误' : ${msg})]]"
+              "errorMsg":"[[(${#strings.isEmpty(msg)} ? '用户名或密码不可以为空' : ${msg})]]"
           },
           "methods":{
               "submitData":function (){

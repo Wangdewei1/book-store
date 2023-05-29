@@ -39,8 +39,8 @@ public class UserServlet extends MethodServlet {
         } else {
             HttpSession session = req.getSession();
             session.setAttribute("userLogin", user);
-            //以分钟为单位
-            session.setMaxInactiveInterval(30);
+            //以秒为单位
+            session.setMaxInactiveInterval(60*30);
 
             processTemplate("user/login_success", req, resp);
         }

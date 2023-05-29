@@ -27,7 +27,7 @@
 <!--				</div>-->
 				<div>
 					<span>欢迎<span class="um_span" th:text="${session.userLogin.userName}">张总</span>光临尚硅谷书城</span>
-					<a href="order/order.html">我的订单</a>
+					<a href="auth/OrderServlet?method=getAllOrder">我的订单</a>
 					<a th:href="@{/UserServlet(method=clearLogin)}">注销</a>&nbsp;&nbsp;
 					<a href="UserServlet/index.html">返回</a>
 				</div>

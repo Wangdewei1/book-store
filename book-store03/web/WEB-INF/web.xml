@@ -24,6 +24,16 @@
         <url-pattern>/auth/*</url-pattern>
     </filter-mapping>
 
+<!--    配置事务过滤器-->
+<!--    <filter>
+        <filter-name>transactionFilter</filter-name>
+        <filter-class>com.itwang.book.filter.model.TransactionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>transactionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+
 <!--    首页 通过servlet thymeleaf渲染-->
     <servlet>
         <servlet-name>IndexServlet</servlet-name>
@@ -98,5 +108,14 @@
     <servlet-mapping>
         <servlet-name>CartServlet</servlet-name>
         <url-pattern>/CartServlet</url-pattern>
+    </servlet-mapping>
+<!--    配置订单 servlet-->
+    <servlet>
+        <servlet-name>OrderServlet</servlet-name>
+        <servlet-class>com.itwang.book.servlet.model.OrderServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OrderServlet</servlet-name>
+        <url-pattern>/auth/OrderServlet</url-pattern>
     </servlet-mapping>
 </web-app>

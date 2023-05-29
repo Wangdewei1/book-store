@@ -3,6 +3,7 @@ package com.itwang.book.dao.model.impl;
 import com.itwang.book.dao.base.impl.BaseDaoImpl;
 import com.itwang.book.dao.model.api.BookDao;
 import com.itwang.book.entity.Book;
+import com.itwang.book.entity.CartItem;
 
 import java.util.List;
 
@@ -80,5 +81,23 @@ public class BookDaoImpl extends BaseDaoImpl<Book> implements BookDao {
     @Override
     public Book getBookById(String bookId) {
         return selectBookInfo(bookId);
+    }
+
+    /**
+     * 批量更新图书的库存和销量
+     * @param cartItemList
+     */
+    @Override
+    public void batchUpdateBook(List<CartItem> cartItemList) {
+        String sql = "update t_book set sales = sales+? ,stock = stock-? where book_id = ?";
+
+        Object[][] params = new Object[cartItemList.size()][3];
+
+        for (int i = 0; i < cartItemList.size(); i++) {
+            CartItem cartItem = cartItemList.get(i);
+            params[i] = new Object[]{cartItem.getCount(),cartItem.getCount(),cartItem.getBook().getBookId()};
+        }
+
+        batchAllData(sql, params);
     }
 }
