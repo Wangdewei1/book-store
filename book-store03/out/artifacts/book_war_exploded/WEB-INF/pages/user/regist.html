@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>尚硅谷会员注册页面</title>
+    <base th:href="@{/}"/>
+    <link type="text/css" rel="stylesheet" href="static/css/style.css" />
+    <link rel="stylesheet" href="static/css/register.css" />
+    <style type="text/css">
+      .login_form {
+        height: 420px;
+        margin-top: 25px;
+      }
+    </style>
+    <script type="text/javascript" src="static/script/vue.js"></script>
+    <script type="text/javascript" src="static/script/axios.min.js"></script>
+  </head>
+  <body>
+    <div id="login_header">
+      <a href="index.html">
+        <img class="logo_img" alt="" src="static/img/logo.gif" />
+      </a>
+    </div>
+
+    <div id="VueApp" class="login_banner">
+      <div class="register_form">
+        <h1>注册尚硅谷会员</h1>
+<!--        <div class="msg_cont">
+          <b></b>
+          <span class="errorMsg">{{errorMsg}}</span>
+        </div>-->
+        <div class="msg_cont">
+          <b></b>
+          <span class="errorMsg">{{errorMsg}}</span>
+        </div>
+        <form action="UserServlet">
+          <!--     隐藏域   提交方法   -->
+          <input type="hidden" name="method" value="register"/>
+<!--          <input type="hidden" name="id" th:value="${session.user.userId}">-->
+          <div class="form-item">
+            <div>
+              <label>用户名称:</label>
+              <input type="text" name="username" placeholder="请输入用户名" v-model.trim="username" @change="checkUsername"/>
+            </div>
+            <span class="errMess" v-bind:style="usernameCss">{{errMess}}</span>
+          </div>
+          <div class="form-item">
+            <div>
+              <label>用户密码:</label>
+              <input type="password" name="password" placeholder="请输入密码" v-model.trim="password" @change.prevent="checkPassword"/>
+            </div>
+            <span class="errMess" :style="passwordCss">{{errMessPsd}}</span>
+          </div>
+          <div class="form-item">
+            <div>
+              <label>确认密码:</label>
+              <input type="password" placeholder="请输入确认密码" v-model.trim="confPassword" @change.prevent="confirmPassword"/>
+            </div>
+            <span class="errMess" :style="confirmPasswordCss">{{errMessConfPassword}}</span>
+          </div>
+          <div class="form-item">
+            <div>
+              <label>用户邮箱:</label>
+              <input type="text" name="email" placeholder="请输入邮箱" v-model.trim="email" @change="checkEmail"/>
+            </div>
+            <span class="errMess" v-bind:style="emailCss">{{errMessEmail}}</span>
+          </div>
+          <div class="form-item">
+            <div>
+              <label>验证码:</label>
+              <div class="verify">
+                <input type="text" name="code" placeholder="请输入验证码" />
+                <img v-bind:src="codePictureUrl" @click="checkCode" alt="" />
+              </div>
+            </div>
+            <span class="errMess" th:text="${msg}">请输入正确的验证码</span>
+          </div>
+          <button class="btn" @click.prevent="submitRegister">注册</button>
+        </form>
+      </div>
+    </div>
+    <div id="bottom">
+      <span>
+        尚硅谷书城.Copyright &copy;2023
+      </span>
+    </div>
+  </body>
+  <script type="text/javascript">
+      new Vue({
+          "el":"#VueApp",
+          "data":{
+              "username":"[[${param.username}]]",
+              "usernameCss":{
+                  "visibility":"hidden"
+              },
+              "usernameFlag":false,
+              "errMess":"用户名应为6~16位数组和字母组成",
+              "password":"",
+              "passwordCss":{
+                  "visibility":"hidden"
+              },
+              "errMessPsd":"密码的长度至少为8位",
+              "confPassword":"",
+              "confirmPasswordCss":{
+                  "visibility":"hidden"
+              },
+              "errMessConfPassword":"密码两次输入不一致",
+              "email":"[[${param.email}]]",
+              "emailCss":{
+                  "visibility":"hidden"
+              },
+              "errMessEmail":"请输入正确的邮箱格式",
+              "codePictureUrl":"KaptchaServlet",
+              "errorMsg":"[[(${msg}) == null ? '请您填写下列信息' : ${msg}]]"
+          },
+          "methods":{
+              "checkUsername":function (){
+                  this.usernameCss = {visibility:"visible"}
+
+                  if (this.username == null || this.username.length == 0){
+                      this.errMess = "用户名不能为空"
+                      return
+                  }
+
+                  let req = /^[A-Za-z0-9]{6,16}$/
+                  // if (req.test(this.username)){
+                  //     this.errMess = "√"
+                  //     return true
+                  // } else {
+                  //     this.errMess = "用户名应为6~16位数组和字母组成"
+                  //     return false
+                  // }
+                  if (!req.test(this.username)){
+                    this.errMess = "用户名应为6~16位数组和字母组成"
+                    return;
+                  }
+
+                  let obj = this;
+
+                //格式验证通过，发送ajax请求验证用户名是否唯一
+                axios({
+                  "url":"UserServlet",
+                  "method":"post",
+                  "params":{
+                    "method":"getUsername",
+                    "username":this.username
+                  }
+                }).then(function (response) {
+                  // console.log(response.data.result)
+                  // console.log(response.data)
+                  if (response.data.result == "SUCCESS"){
+                    obj.errMess = "用户名可用"
+                    obj.usernameFlag = true
+                  }
+                  if(response.data.result == "FAILED"){
+                    obj.errMess = "用户名已存在"
+                    obj.usernameFlag = false
+                  }
+                })
+                return this.usernameFlag;
+              },
+              "checkPassword":function (){
+
+                  this.passwordCss = {"visibility":"visible"}
+
+                  if (this.password == null || this.password.length == 0 || this.password === ""){
+                    this.errMessPsd = "密码不能为空"
+                    return
+                  }
+
+                  let req = /^[a-zA-Z0-9_\.]{8,}$/
+                  if (req.test(this.password)){
+                      this.errMessPsd = "√"
+                      return true
+                  } else {
+                      this.errMessPsd = "密码的长度至少为8位"
+                      return false
+                  }
+              },
+              "confirmPassword":function (){
+                  this.confirmPasswordCss = {"visibility":"visible"}
+
+
+                  if (this.confPassword == null || this.confPassword.length == 0 || this.confPassword === ""){
+                    this.errMessConfPassword = "密码不能为空"
+                    return
+                  }
+
+
+                  if (this.password == this.confPassword){
+                      this.errMessConfPassword = "√"
+                      return true
+                  } else {
+                      this.errMessConfPassword = "密码两次输入不一致"
+                      return false
+                  }
+              },
+              "checkEmail":function (){
+                  this.emailCss = {"visibility":"visible"}
+
+                  if (this.email == null || this.email.length == 0 || this.email === ""){
+                    this.errMessEmail = "邮箱不能为空"
+                    return
+                  }
+
+
+                  let req = /^[a-zA-Z0-9_\.-]+@([a-zA-Z0-9-]+[\.]{1})+[a-zA-Z]+$/
+                  if (req.test(this.email)){
+                      this.errMessEmail = "√"
+                        return true
+                  } else {
+                      this.errMessEmail = "请输入正确的邮箱格式"
+                      return false
+                  }
+              },
+              "submitRegister":function (){
+                  if (this.checkUsername() && this.checkPassword() && this.confirmPassword() && this.checkEmail()){
+                      event.target.parentElement.submit()
+                  }
+              },
+              "checkCode":function (){
+                      this.codePictureUrl = "KaptchaServlet?random=" + Math.random()
+              }
+          }
+      })
+  </script>
+<!--shift insert 粘贴-->
+</html>
